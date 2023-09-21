@@ -1,11 +1,57 @@
+function Student(props) {
+  return (
+    <li>
+      <h2>Name: {props.name}</h2>
+      <p>Address: {props.address}</p>
+      <button>Sửa</button>
+      <button>Xóa</button>
+    </li>
+  )
+}
+
 class AppComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      validCD: '',
-      validCR: '',
-      chuVi: '',
-      dienTich: ''
+      validName: '',
+      validAdd: '',
+      listStudents: [
+        {
+          id: '1',
+          name: "Dinh",
+          address: "hue"
+        },
+        {
+          id: '2',
+          name: "Nam",
+          address: "quang nam"
+        },
+        {
+          id: '3',
+          name: "Tan",
+          address: "da nang"
+        },
+        {
+          id: '4',
+          name: "Hung",
+          address: "hue"
+        },
+        {
+          id: '5',
+          name: "Tri",
+          address: "quang tri"
+        },
+        {
+          id: '6',
+          name: "Anh",
+          address: "hue"
+        },
+        {
+          id: '7',
+          name: "Binh",
+          address: "da nang"
+        }
+      ]
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -21,55 +67,63 @@ class AppComponent extends React.Component {
         formValue[el.name] = el.value;
       }
     }
-    var chieuDai = Number(formValue['chieudai']);
-    var chieuRong = Number(formValue['chieurong']);
-    if (chieuDai && chieuRong) {
+    var check = true;
+    if (!formValue['name']) {
       this.setState({
-        chuVi: (chieuDai + chieuRong) * 2,
-        dienTich: chieuDai * chieuRong
+        validName: 'Vui lòng nhập tên'
       });
-    } else {
-      if (!chieuDai) {
-        this.setState({
-          validCD: 'Vui lòng nhập chiều dài'
-        });
-      }
-      if (!chieuRong) {
-        this.setState({
-          validCR: 'Vui lòng nhập chiều rộng'
-        });
-      }
+      check = false;
+    }
+    if (!formValue['address']) {
       this.setState({
-        chuVi: '',
-        dienTich: ''
+        validAdd: 'Vui lòng nhập địa chỉ'
+      });
+      check = false;
+    }
+
+    function generateUuid() {
+      return 'xxxx-xxxx-xxx-xxxx'.replace(/[x]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    formValue['id'] = generateUuid();
+
+    if (check) {
+      var newList = [
+        ...this.state.listStudents,
+        formValue
+      ]
+      this.setState({
+        listStudents: newList
       });
     }
   }
 
   handleBlur(e) {
-    if (e.target.name == 'chieudai') {
+    if (e.target.name == 'name') {
       if (!e.target.value) {
         this.setState({
-          validCD: 'Vui lòng nhập chiều dài'
+          validName: 'Vui lòng nhập tên'
         });
       }
-    } else if (e.target.name == 'chieurong') {
+    } else if (e.target.name == 'address') {
       if (!e.target.value) {
         this.setState({
-          validCR: 'Vui lòng nhập chiều rộng'
+          validAdd: 'Vui lòng nhập địa chỉ'
         });
       }
     }
   }
 
   handleInput(e) {
-    if (e.target.name == 'chieudai') {
+    if (e.target.name == 'name') {
       this.setState({
-        validCD: ''
+        validName: ''
       });
-    } else if (e.target.name == 'chieurong') {
+    } else if (e.target.name == 'address') {
       this.setState({
-        validCR: ''
+        validAdd: ''
       });
     }
   }
@@ -80,22 +134,40 @@ class AppComponent extends React.Component {
       <>
         <form onSubmit={this.handleSubmit}>
           <div>
-            <label>Chiều dài</label>
-            <input onBlur={this.handleBlur} onInput={this.handleInput} type="text" name="chieudai" />
-            <span>{this.state.validCD}</span>
+            <label>Tên</label>
+            <input onBlur={this.handleBlur} onInput={this.handleInput} type="text"
+              name="name" className={this.state.validName && 'invalid'} />
+            <span style={{
+              display: 'block',
+              color: 'red',
+              fontStyle: 'italic'
+            }}>{this.state.validName}</span>
           </div>
           <br />
           <div>
-            <label>Chiều rộng</label>
-            <input onBlur={this.handleBlur} onInput={this.handleInput} type="text" name="chieurong" />
-            <span>{this.state.validCR}</span>
+            <label>Địa chỉ</label>
+            <input onBlur={this.handleBlur} onInput={this.handleInput} type="text"
+              name="address" className={this.state.validAdd && 'invalid'} />
+            <span style={{
+              display: 'block',
+              color: 'red',
+              fontStyle: 'italic'
+            }}>{this.state.validAdd}</span>
           </div>
-          <input type="submit" value="Tinh" />
+          <div>
+            <button>Thêm</button>
+            <button style={{ display: 'none' }}>Sửa</button>
+          </div>
         </form>
-        {this.state.chuVi && this.state.dienTich && <div>
-          <p>Chu vi: {this.state.chuVi}</p>
-          <p>Diện tích: {this.state.dienTich}</p>
-        </div>}
+        <ul>
+          {this.state.listStudents.map((student, idx) =>
+            <Student
+              key={idx}
+              name={student.name}
+              address={student.address}
+            />
+          )}
+        </ul>
       </>
     )
   }
