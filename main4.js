@@ -7,7 +7,7 @@ function PostItem(prop) {
         <h2><a href="#">{prop.title}</a></h2>
         <p>{prop.content}</p>
       </div>
-      <div class="clr"></div>
+      <div className="clr"></div>
     </li>
   )
 }
@@ -33,21 +33,31 @@ const listNews = [
   }
 ];
 
-const App = (
-  <div className='wrapper'>
-    <h1>Trang tin VinaEnter Edu</h1>
-    <ul>
-      {listNews.map(function (news) {
-        return (
-          <PostItem
-            img={news.img}
-            title={news.title}
-            content={news.content}
-          />
-        )
-      })}
-    </ul>
-  </div>
-)
+class AppComponent extends React.Component {
+  constructor(props) {
+    super(props);
+  }
 
-ReactDOM.render(App, document.getElementById("root"))
+  render() {
+
+    return (
+      <div className='wrapper'>
+        <h1>Trang tin VinaEnter Edu</h1>
+        <ul>
+          {this.props.listNews.map(function (news) {
+            return (
+              <PostItem
+                key={news.id}
+                img={news.img}
+                title={news.title}
+                content={news.content}
+              />
+            )
+          })}
+        </ul>
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<AppComponent listNews={listNews} />, document.getElementById("root"))

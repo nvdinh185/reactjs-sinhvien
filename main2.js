@@ -9,14 +9,19 @@ function PostItem() {
   )
 }
 
-const App = (
-  <div className='wrapper'>
-    <div className='posts-list'>
-      <PostItem />
-      <PostItem />
-      <PostItem />
-    </div>
-  </div>
-)
+class AppComponent extends React.Component {
+  render() {
 
-ReactDOM.render(App, document.getElementById("root"))
+    return (
+      <div className='wrapper'>
+        <div className='posts-list'>
+          <PostItem />
+          <PostItem />
+          <PostItem />
+        </div>
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<AppComponent />, document.getElementById("root"))
