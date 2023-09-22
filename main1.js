@@ -1,14 +1,3 @@
-function Student(props) {
-  return (
-    <li>
-      <h2>Name: {props.name}</h2>
-      <p>Address: {props.address}</p>
-      <button>Sửa</button>
-      <button>Xóa</button>
-    </li>
-  )
-}
-
 class AppComponent extends React.Component {
   constructor(props) {
     super(props);
@@ -52,13 +41,17 @@ class AppComponent extends React.Component {
           address: "da nang"
         }
       ],
+      id: '',
       name: '',
-      address: ''
+      address: '',
+      isEdit: false
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
     this.handleInput = this.handleInput.bind(this);
+    this.handleClickEdit = this.handleClickEdit.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
   }
 
   handleSubmit = function (e) {
@@ -91,16 +84,30 @@ class AppComponent extends React.Component {
     }
 
     if (check) {
-      formValue['id'] = generateUuid();
-      var newList = [
-        ...this.state.listStudents,
-        formValue
-      ]
-      this.setState({
-        listStudents: newList,
-        name: '',
-        address: ''
-      });
+      if (formValue['id']) {
+        var edId = formValue['id'];
+        var idx = this.state.listStudents.findIndex(student => student.id == edId);
+        this.state.listStudents.splice(idx, 1, formValue);
+        this.setState({
+          listStudents: this.state.listStudents,
+          id: '',
+          name: '',
+          address: '',
+          isEdit: false
+        });
+      } else {
+        formValue['id'] = generateUuid();
+        var newList = [
+          ...this.state.listStudents,
+          formValue
+        ]
+        this.setState({
+          listStudents: newList,
+          name: '',
+          address: ''
+        });
+
+      }
     }
   }
 
@@ -132,14 +139,35 @@ class AppComponent extends React.Component {
     }
   }
 
+  handleClickEdit(student) {
+    // console.log(student);
+    this.setState({
+      id: student.id,
+      name: student.name,
+      address: student.address,
+      isEdit: true
+    });
+  }
+
+  handleDelete(student) {
+    if (confirm('Bạn có chắc muốn xóa ?')) {
+      var idx = this.state.listStudents.findIndex(st => st.id == student.id);
+      this.state.listStudents.splice(idx, 1);
+      this.setState({
+        listStudents: this.state.listStudents
+      });
+    }
+  }
+
   render() {
 
     return (
       <>
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={(e) => this.handleSubmit(e)}>
+          <input type='hidden' name='id' value={this.state.id} />
           <div>
             <label>Tên</label>
-            <input onBlur={this.handleBlur} onInput={this.handleInput} type="text"
+            <input onBlur={(e) => this.handleBlur(e)} onInput={(e) => this.handleInput(e)} type="text"
               name="name" className={this.state.validName && 'invalid'} value={this.state.name}
               onChange={(e) => { this.setState({ name: e.target.value }) }} />
             <span style={{
@@ -151,7 +179,7 @@ class AppComponent extends React.Component {
           <br />
           <div>
             <label>Địa chỉ</label>
-            <input onBlur={this.handleBlur} onInput={this.handleInput} type="text"
+            <input onBlur={(e) => this.handleBlur(e)} onInput={(e) => this.handleInput(e)} type="text"
               name="address" className={this.state.validAdd && 'invalid'} value={this.state.address}
               onChange={(e) => { this.setState({ address: e.target.value }) }} />
             <span style={{
@@ -161,17 +189,17 @@ class AppComponent extends React.Component {
             }}>{this.state.validAdd}</span>
           </div>
           <div>
-            <button>Thêm</button>
-            <button style={{ display: 'none' }}>Sửa</button>
+            <button>{this.state.isEdit ? 'Sửa' : 'Thêm'}</button>
           </div>
         </form>
         <ul>
           {this.state.listStudents.map((student, idx) =>
-            <Student
-              key={idx}
-              name={student.name}
-              address={student.address}
-            />
+            <li key={idx}>
+              <h2>Name: {student.name}</h2>
+              <p>Address: {student.address}</p>
+              <button onClick={() => this.handleClickEdit(student)}>Sửa</button>
+              <button onClick={() => this.handleDelete(student)}>Xóa</button>
+            </li>
           )}
         </ul>
       </>

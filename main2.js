@@ -2,20 +2,25 @@ class Student extends React.Component {
   constructor(props) {
     super(props);
     this.handleClickEdit = this.handleClickEdit.bind(this);
+    this.handleClickDelete = this.handleClickDelete.bind(this);
   }
 
-  handleClickEdit(e) {
-    // console.log(e);
-    this.props.onClickEdit(e);
+  handleClickEdit(student) {
+    this.props.onClickEdit(student);
+  }
+
+  handleClickDelete(student) {
+    this.props.onClickDelete(student);
   }
 
   render() {
+    var student = this.props;
     return (
       <li>
-        <h2>Name: {this.props.name}</h2>
-        <p>Address: {this.props.address}</p>
-        <button onClick={() => this.handleClickEdit(this.props)}>Sửa</button>
-        <button>Xóa</button>
+        <h2>Name: {student.name}</h2>
+        <p>Address: {student.address}</p>
+        <button onClick={() => this.handleClickEdit(student)}>Sửa</button>
+        <button onClick={() => this.handleClickDelete(student)}>Xóa</button>
       </li>
     )
   }
@@ -64,6 +69,7 @@ class AppComponent extends React.Component {
           address: "da nang"
         }
       ],
+      id: '',
       name: '',
       address: '',
       isEdit: false
@@ -72,7 +78,7 @@ class AppComponent extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
     this.handleInput = this.handleInput.bind(this);
-    this.handleEdit = this.handleEdit.bind(this);
+    this.handleOnClickEdit = this.handleOnClickEdit.bind(this);
   }
 
   handleSubmit = function (e) {
@@ -103,16 +109,31 @@ class AppComponent extends React.Component {
         return v.toString(16);
       });
     }
-    formValue['id'] = generateUuid();
 
     if (check) {
-      var newList = [
-        ...this.state.listStudents,
-        formValue
-      ]
-      this.setState({
-        listStudents: newList
-      });
+      if (formValue['id']) {
+        var edId = formValue['id'];
+        var idx = this.state.listStudents.findIndex(student => student.id == edId);
+        this.state.listStudents.splice(idx, 1, formValue);
+        this.setState({
+          listStudents: this.state.listStudents,
+          id: '',
+          name: '',
+          address: '',
+          isEdit: false
+        });
+      } else {
+        formValue['id'] = generateUuid();
+        var newList = [
+          ...this.state.listStudents,
+          formValue
+        ]
+        this.setState({
+          listStudents: newList,
+          name: '',
+          address: ''
+        });
+      }
     }
   }
 
@@ -144,13 +165,24 @@ class AppComponent extends React.Component {
     }
   }
 
-  handleEdit(e) {
-    // console.log(e.name);
+  handleOnClickEdit(student) {
+    // console.log(student.name);
     this.setState({
-      name: e.name,
-      address: e.address,
+      id: student.id,
+      name: student.name,
+      address: student.address,
       isEdit: true
     });
+  }
+
+  handleDelete(student) {
+    if (confirm('Bạn có chắc muốn xóa ?')) {
+      var idx = this.state.listStudents.findIndex(st => st.id == student.id);
+      this.state.listStudents.splice(idx, 1);
+      this.setState({
+        listStudents: this.state.listStudents
+      });
+    }
   }
 
   render() {
@@ -158,10 +190,12 @@ class AppComponent extends React.Component {
     return (
       <>
         <form onSubmit={this.handleSubmit}>
+          <input type='hidden' name='id' value={this.state.id} />
           <div>
             <label>Tên</label>
             <input onBlur={this.handleBlur} onInput={this.handleInput} type="text"
-              name="name" className={this.state.validName && 'invalid'} value={this.state.name} />
+              name="name" className={this.state.validName && 'invalid'} value={this.state.name}
+              onChange={(e) => { this.setState({ name: e.target.value }) }} />
             <span style={{
               display: 'block',
               color: 'red',
@@ -172,7 +206,8 @@ class AppComponent extends React.Component {
           <div>
             <label>Địa chỉ</label>
             <input onBlur={this.handleBlur} onInput={this.handleInput} type="text"
-              name="address" className={this.state.validAdd && 'invalid'} value={this.state.address} />
+              name="address" className={this.state.validAdd && 'invalid'} value={this.state.address}
+              onChange={(e) => { this.setState({ address: e.target.value }) }} />
             <span style={{
               display: 'block',
               color: 'red',
@@ -189,7 +224,8 @@ class AppComponent extends React.Component {
               key={idx}
               name={student.name}
               address={student.address}
-              onClickEdit={this.handleEdit}
+              onClickEdit={() => this.handleOnClickEdit(student)}
+              onClickDelete={() => this.handleDelete(student)}
             />
           )}
         </ul>
